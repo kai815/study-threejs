@@ -36,14 +36,19 @@
         //シーンの大きさを定義
         renderer.setSize(window.innerWidth, window.innerHeight);
 
+        //影を使う設定
+        renderer.shadowMap.enabled = true;
+
         //座標軸をシーンに追加
-        var axes = new THREE.AxisHelper(20);
-        scene.add(axes);
+        // var axes = new THREE.AxisHelper(20);
+        // scene.add(axes);
 
         //平面の作成
         var planeGeometry = new THREE.PlaneGeometry(60, 20);
-        var planeMaterial = new THREE.MeshBasicMaterial({color: 0xcccccc});
+        var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
         var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        //影を落とされる物体であることを指定
+        plane.receiveShadow = true;
 
         plane.rotation.x = -0.5 * Math.PI;
         plane.position.x = 15;
@@ -55,8 +60,10 @@
         
         //立方体の作成
         var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-        var cubeMaterial = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true});
+        var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
         var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        //影を落とす物体であることを指定
+        cube.castShadow = true;
 
         cube.position.x = -4;
         cube.position.y = 3;
@@ -68,8 +75,10 @@
 
         //球体の作成
         var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
-        var sphereMaterial = new THREE.MeshBasicMaterial({color: 0x7777ff, wireframe: true});
+        var sphereMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
         var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        //影を落とす物体であることを指定
+        sphere.castShadow = true;
 
         sphere.position.x = 20;
         sphere.position.y = 4;
@@ -84,6 +93,13 @@
         camera.position.z = 30;
         //シーンの中心を向くよう
         camera.lookAt(scene.position);
+
+        // ライトを追加
+        var spotLight = new THREE.SpotLight(0xffffff);
+        //ここのライトの位置で光を当てる
+        spotLight.position.set(-20, 30, -5);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
 
         // domを追加
         document.getElementById("WebGL-output").appendChild(renderer.domElement);

@@ -29,15 +29,19 @@
 <script type="text/javascript">
 
     // 全ての読み込みが終わってからthreejsを実行する.
+
+    var scene;
+    var camera;
+    var renderer;
     function init() {
         // Three.jsの処理を記述
 
         var stats = initStats();
         //シーンを定義
-        var scene = new THREE.Scene();
-        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         //Cameraオブジェクトの角度に基づいてブラウザ内でsceneオブジェクトがどのように見えるかを計算する
-        var renderer = new THREE.WebGLRenderer();
+        renderer = new THREE.WebGLRenderer();
         //背景色の色をほぼ真っ白に
         renderer.setClearColor(new THREE.Color(0xEEEEEE));
         //シーンの大きさを定義
@@ -156,9 +160,18 @@
             
             document.getElementById("Stats-output").appendChild(stats.domElement);
             return stats;
-}
+        }
+    }
+
+    function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
     }
     window.onload = init
+
+    //ブラウザのサイズが変わったらリサイズされるように
+    window.addEventListener('resize', onResize, false);
 
 </script>
 </body>

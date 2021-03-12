@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 02.01 - Basic Scene</title>
+    <script type="text/javascript" src="../lib/three.js"></script>
+
+    <script type="text/javascript" src="../lib/stats.js"></script>
+    <script type="text/javascript" src="../lib/dat.gui.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div id="Stats-output">
+</div>
+<!-- Div which will hold the Output -->
+<div id="WebGL-output">
+</div>
+
+<!-- Javascript code that runs our Three.js examples -->
+<script type="text/javascript">
+
+    // 読みこまれたらthreejsの処理を実行させる
+    function init() {
+
+        var stats = initStats();
+
+        // シーンの作成 カメラやライトのようなシーンに必要なオブジェクトを保持.
+        var scene = new THREE.Scene();
+
+        // カメラの作成 どこから見えるかを指定
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        scene.add(camera);
+
+        // renderの作成
+        var renderer = new THREE.WebGLRenderer();
+
+        renderer.setClearColor(new THREE.Color(0xEEEEEE));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+
+        // 地面の作成
+        var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
+        var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.receiveShadow = true;
+
+        // 地面のポジションとrotate
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.x = 0;
+        plane.position.y = 0;
+        plane.position.z = 0;
+
+        // 地面をシーンに追加
+        scene.add(plane);
+
+        // カメラのポジションを真ん中に
+        camera.position.x = -30;
+        camera.position.y = 40;
+        camera.position.z = 30;
+        camera.lookAt(scene.position);
+
+        // add subtle ambient lighting
+        var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+        scene.add(ambientLight);
+
+        // add spotlight for the shadows
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(-20, 30, -5);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+
+        // add the output of the renderer to the html element
+        document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+        // call the render function
+        var step = 0;
+
+        var controls = new function () {
+            this.rotationSpeed = 0.02;
+            this.numberOfObjects = scene.children.length;
+
+            this.removeCube = function () {
+                var allChildren = scene.children;
+                var lastObject = allChildren[allChildren.length - 1];
+                //カメラやライトを消さないように
+                if (lastObject instanceof THREE.Mesh) {
+                    scene.remove(lastObject);
+                    this.numberOfObjects = scene.children.length;
+                }
+            };
+
+            this.addCube = function () {
+
+                var cubeSize = Math.ceil((Math.random() * 3));
+                var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+                var cubeMaterial = new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff});
+                var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                cube.castShadow = true;
+                cube.name = "cube-" + scene.children.length;
+
+
+                // キューブをシーンの中のランダムの位置に
+
+                cube.position.x = -30 + Math.round((Math.random() * planeGeometry.parameters.width));
+                cube.position.y = Math.round((Math.random() * 5));
+                cube.position.z = -20 + Math.round((Math.random() * planeGeometry.parameters.height));
+
+                // シーンに追加
+                scene.add(cube);
+                this.numberOfObjects = scene.children.length;
+            };
+
+            this.outputObjects = function () {
+                console.log(scene.children);
+            }
+        };
+
+        var gui = new dat.GUI();
+        gui.add(controls, 'rotationSpeed', 0, 0.5);
+        gui.add(controls, 'addCube');
+        gui.add(controls, 'removeCube');
+        gui.add(controls, 'outputObjects');
+        gui.add(controls, 'numberOfObjects').listen();
+
+        render();
+
+        function render() {
+            stats.update();
+
+            // rotate the cubes around its axes
+            scene.traverse(function (obj) {
+                if (obj instanceof THREE.Mesh && obj != plane) {
+
+                    obj.rotation.x += controls.rotationSpeed;
+                    obj.rotation.y += controls.rotationSpeed;
+                    obj.rotation.z += controls.rotationSpeed;
+                }
+            });
+
+            // render using requestAnimationFrame
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+
+        function initStats() {
+
+            var stats = new Stats();
+
+            stats.setMode(0); // 0: fps, 1: ms
+
+            // 左上
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+
+            document.getElementById("Stats-output").appendChild(stats.domElement);
+
+            return stats;
+        }
+    }
+    window.onload = init
+
+
+</script>
+</body>
+</html>

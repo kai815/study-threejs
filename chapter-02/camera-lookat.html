@@ -3,7 +3,7 @@
 <html>
 
 <head>
-    <title>Example 02.07 - Cameras</title>
+    <title>Example 02.08 - Cameras</title>
     <script type="text/javascript" src="../lib/three.js"></script>
 
     <script type="text/javascript" src="../lib/stats.js"></script>
@@ -62,12 +62,9 @@
         scene.add(plane);
 
         var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-
+        var cubeMaterial = new THREE.MeshLambertMaterial({color: 0x00ee22});
         for (var j = 0; j < (planeGeometry.parameters.height / 5); j++) {
             for (var i = 0; i < planeGeometry.parameters.width / 5; i++) {
-                var rnd = Math.random() * 0.75 + 0.25;
-                var cubeMaterial = new THREE.MeshLambertMaterial();
-                cubeMaterial.color = new THREE.Color(rnd, 0, 0);
                 var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
                 cube.position.z = -((planeGeometry.parameters.height) / 2) + 2 + (j * 5);
@@ -77,6 +74,10 @@
                 scene.add(cube);
             }
         }
+
+        var lookAtGeom = new THREE.SphereGeometry(2);
+        var lookAtMesh = new THREE.Mesh(lookAtGeom, new THREE.MeshLambertMaterial({color: 0xff0000}));
+        scene.add(lookAtMesh);
 
 
         var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
@@ -96,13 +97,14 @@
 
         var controls = new function () {
             this.perspective = "Perspective";
-            //カメラを切り替える
+            // カメラを切り替える
             this.switchCamera = function () {
                 if (camera instanceof THREE.PerspectiveCamera) {
                     camera = new THREE.OrthographicCamera(window.innerWidth / -16, window.innerWidth / 16, window.innerHeight / 16, window.innerHeight / -16, -200, 500);
                     camera.position.x = 120;
                     camera.position.y = 60;
                     camera.position.z = 180;
+
                     camera.lookAt(scene.position);
                     this.perspective = "Orthographic";
                 } else {
@@ -121,14 +123,25 @@
         gui.add(controls, 'switchCamera');
         gui.add(controls, 'perspective').listen();
 
-        //初期時のカメラのがどこをみるか
-        camera.lookAt(scene.position);
+        //   camera.lookAt(scene.position);
         render();
+
+
+        var step = 0;
 
         function render() {
 
             stats.update();
             // render using requestAnimationFrame
+            step += 0.02;
+            if (camera instanceof THREE.Camera) {
+                // 視点の移動
+                var x = 10 + ( 100 * (Math.sin(step)));
+                camera.lookAt(new THREE.Vector3(x, 10, 0));
+                lookAtMesh.position.copy(new THREE.Vector3(x, 10, 0));
+            }
+
+//        .position.x = 20+( 10*(Math.cos(step)));
             requestAnimationFrame(render);
             renderer.render(scene, camera);
         }
